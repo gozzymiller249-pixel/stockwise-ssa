@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import predictor from './utils/inventoryPredictor';
 import {
   BarChart,
   Bar,
@@ -191,6 +192,54 @@ const categoryData = Object.values(
             </p>
           </div>
 
+        </div>
+        
+        {/* SMART INSIGHTS */}
+        <div className="bg-purple-50 p-5 rounded-2xl shadow border mb-6">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            🤖 Smart Inventory Insights
+          </h2>
+          
+          <div className="space-y-3">
+            {/* Inventory Health Score */}
+            <div className="flex justify-between items-center bg-white p-3 rounded-lg">
+              <span>📊 Inventory Health Score</span>
+              <span className="font-bold text-lg">{predictor.calculateHealthScore(products)}/100</span>
+            </div>
+            
+            {/* Stock Predictions */}
+            <div className="bg-white p-3 rounded-lg">
+              <p className="font-semibold mb-2">🔮 Stockout Predictions</p>
+              {products.length === 0 ? (
+                <p className="text-gray-400 text-sm">Add products to see predictions</p>
+              ) : (
+                products.map(product => {
+                  const daysLeft = predictor.predictStockoutDays(product.name, Number(product.quantity));
+                  return (
+                    <div key={product.name} className="flex justify-between text-sm py-1">
+                      <span>{product.name}</span>
+                      <span className={daysLeft < 7 ? "text-red-500 font-bold" : "text-gray-600"}>
+                        {daysLeft === "No sales data" ? "📈 Learning..." : `${daysLeft} days left`}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+            
+            {/* Reorder Alerts */}
+            {predictor.getReorderRecommendations(products).length > 0 && (
+              <div className="bg-yellow-50 border-l-4 border-yellow-500 p-3 rounded-lg">
+                <p className="font-semibold text-yellow-700">⚠️ Reorder Alerts</p>
+                {predictor.getReorderRecommendations(products).map(rec => (
+                  <div key={rec.product} className="text-sm mt-1">
+                    <p><strong>{rec.product}</strong>: {rec.message}</p>
+                    <p className="text-xs text-gray-600">Suggested: {rec.suggestedOrder} units</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ANALYTICS */}
