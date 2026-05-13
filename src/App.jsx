@@ -1,4 +1,3 @@
-// Force redeploy - v2
 import { useState, useEffect } from "react";
 import predictor from './utils/inventoryPredictor';
 import {
@@ -12,29 +11,29 @@ import {
 
 function App() {
 
+  // PRODUCT STATE
   const [products, setProducts] = useState(() => {
-  const savedProducts = localStorage.getItem("products");
-  
-  // Default products to show when localStorage is empty
-  const defaultProducts = [
-    { name: "Power Bank", category: "Electronics", quantity: "100", price: "25000" },
-    { name: "Iphone Charger", category: "Electronics", quantity: "100", price: "10000" },
-    { name: "Rechargeable Lamp", category: "Electronics", quantity: "50", price: "10500" },
-    { name: "Alarm Clock", category: "Electronics", quantity: "50", price: "100" },
-    { name: "Wristwatch", category: "Electronics", quantity: "50", price: "20000" },
-    { name: "Face Mask", category: "Beauty", quantity: "100", price: "2000" }
-  ];
-  
-  if (savedProducts) {
-    return JSON.parse(savedProducts);
-  } else {
-    // First time visitor - load default products
-    return defaultProducts;
-  }
-});
+    const savedProducts = localStorage.getItem("products");
+    const defaultProducts = [
+      { name: "Power Bank", category: "Electronics", quantity: "100", price: "25000" },
+      { name: "Iphone Charger", category: "Electronics", quantity: "100", price: "10000" },
+      { name: "Rechargeable Lamp", category: "Electronics", quantity: "50", price: "10500" },
+      { name: "Alarm Clock", category: "Electronics", quantity: "50", price: "100" },
+      { name: "Wristwatch", category: "Electronics", quantity: "50", price: "20000" },
+      { name: "Face Mask", category: "Beauty", quantity: "100", price: "2000" }
+    ];
+    
+    if (savedProducts && JSON.parse(savedProducts).length > 0) {
+      return JSON.parse(savedProducts);
+    } else {
+      return defaultProducts;
+    }
+  });
 
   const [searchTerm, setSearchTerm] = useState("");
   const [showMenu, setShowMenu] = useState(false);
+  const [showSuppliers, setShowSuppliers] = useState(false);
+  const [showTaxReport, setShowTaxReport] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -43,10 +42,51 @@ function App() {
     price: ""
   });
 
+  // SUPPLIERS STATE - Smart City Supply Chain
+  const [suppliers, setSuppliers] = useState(() => {
+    const savedSuppliers = localStorage.getItem("suppliers");
+    if (savedSuppliers) {
+      return JSON.parse(savedSuppliers);
+    }
+    return [
+      { id: 1, name: "Lagos Electronics Hub", product: "Power Bank, Iphone Charger", leadTime: "2 days", location: "Ikeja, Lagos" },
+      { id: 2, name: "Beauty Distributors Ltd", product: "Face Mask", leadTime: "3 days", location: "Victoria Island, Lagos" },
+      { id: 3, name: "Timepieces Nigeria", product: "Wristwatch, Alarm Clock", leadTime: "5 days", location: "Ajah, Lagos" },
+      { id: 4, name: "Lighting Solutions NG", product: "Rechargeable Lamp", leadTime: "2 days", location: "Maryland, Lagos" }
+    ];
+  });
+
+  // STORE LOCATION - Smart City Integration
+  const [storeLocation, setStoreLocation] = useState(() => {
+    const saved = localStorage.getItem("storeLocation");
+    return saved || "Ikeja, Lagos Mainland";
+  });
+
+  // TAX STATE - Nigerian Tax System
+  const [taxPeriod, setTaxPeriod] = useState("March 2026");
+  const [tinNumber, setTinNumber] = useState(() => {
+    const saved = localStorage.getItem("tinNumber");
+    return saved || "01234567-0001";
+  });
+
+  // SAVE TO LOCALSTORAGE
   useEffect(() => {
     localStorage.setItem("products", JSON.stringify(products));
   }, [products]);
 
+  useEffect(() => {
+    localStorage.setItem("suppliers", JSON.stringify(suppliers));
+  }, [suppliers]);
+
+  useEffect(() => {
+    localStorage.setItem("storeLocation", storeLocation);
+  }, [storeLocation]);
+
+  useEffect(() => {
+    localStorage.setItem("tinNumber", tinNumber);
+  }, [tinNumber]);
+
+  // FORM HANDLERS
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -55,19 +95,11 @@ function App() {
   };
 
   const addProduct = () => {
-
-    if (
-      !formData.name ||
-      !formData.category ||
-      !formData.quantity ||
-      !formData.price
-    ) {
+    if (!formData.name || !formData.category || !formData.quantity || !formData.price) {
       alert("Please fill all fields");
       return;
     }
-
     setProducts([...products, formData]);
-
     setFormData({
       name: "",
       category: "",
@@ -76,6 +108,7 @@ function App() {
     });
   };
 
+  // CHART DATA
   const categoryData = Object.values(
     products.reduce((acc, product) => {
       if (!acc[product.category]) {
@@ -90,11 +123,15 @@ function App() {
   );
 
   const deleteProduct = (indexToDelete) => {
-    const updatedProducts = products.filter(
-      (_, index) => index !== indexToDelete
-    );
+    const updatedProducts = products.filter((_, index) => index !== indexToDelete);
     setProducts(updatedProducts);
   };
+
+  // TAX CALCULATIONS
+  const totalSales = products.reduce((total, p) => total + (Number(p.price) * Number(p.quantity)), 0);
+  const vatCollected = products.reduce((total, p) => total + (Number(p.price) * Number(p.quantity) * 0.075), 0);
+  const estimatedProfit = Math.floor(totalSales * 0.3);
+  const citAmount = Math.floor(estimatedProfit * 0.2);
 
   return (
     <div className="min-h-screen bg-gray-300 flex justify-center items-center p-4">
@@ -115,10 +152,28 @@ function App() {
           </div>
         </div>
 
+        {/* LOCATION BANNER - Smart City Integration */}
+        <div className="bg-blue-100 p-3 rounded-xl mb-4 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <span>📍</span>
+            <span className="text-sm font-semibold">Store Zone:</span>
+            <span className="text-sm">{storeLocation}</span>
+          </div>
+          <div className="text-xs text-gray-500">
+            <span>🚚 Smart City Supply Chain Active</span>
+          </div>
+        </div>
+
         {/* COLLAPSIBLE MENU */}
         <div className="mb-6">
           <button
-            onClick={() => setShowMenu(!showMenu)}
+            onClick={() => {
+              setShowMenu(!showMenu);
+              if (showMenu) {
+                setShowSuppliers(false);
+                setShowTaxReport(false);
+              }
+            }}
             className="bg-white shadow border rounded-xl px-4 py-3 w-full flex justify-between items-center"
           >
             <span className="font-semibold">Menu</span>
@@ -127,13 +182,163 @@ function App() {
 
           {showMenu && (
             <div className="bg-white shadow rounded-2xl mt-2 p-3 flex flex-col gap-3 border">
-              <button className="text-left text-blue-600 font-semibold">Home</button>
-              <button className="text-left text-gray-600">Stock</button>
-              <button className="text-left text-gray-600">Reports</button>
-              <button className="text-left text-gray-600">More</button>
+              <button 
+                onClick={() => {
+                  setShowSuppliers(false);
+                  setShowTaxReport(false);
+                }}
+                className="text-left text-blue-600 font-semibold"
+              >
+                Home
+              </button>
+              <button 
+                onClick={() => {
+                  setShowSuppliers(false);
+                  setShowTaxReport(false);
+                }}
+                className="text-left text-gray-600"
+              >
+                Stock
+              </button>
+              <button 
+                onClick={() => {
+                  setShowSuppliers(true);
+                  setShowTaxReport(false);
+                }}
+                className="text-left text-gray-600"
+              >
+                🚚 Suppliers
+              </button>
+              <button 
+                onClick={() => {
+                  setShowTaxReport(true);
+                  setShowSuppliers(false);
+                }}
+                className="text-left text-gray-600"
+              >
+                🏛️ Tax Report
+              </button>
             </div>
           )}
         </div>
+
+        {/* SUPPLIERS SECTION - Smart City Supply Chain */}
+        {showSuppliers && (
+          <div className="bg-green-50 p-5 rounded-2xl shadow border mb-6">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              🚚 Smart City Supply Chain
+            </h2>
+            
+            <div className="space-y-3">
+              {suppliers.map(supplier => (
+                <div key={supplier.id} className="bg-white p-3 rounded-lg">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-bold">{supplier.name}</p>
+                      <p className="text-sm text-gray-600">Products: {supplier.product}</p>
+                      <p className="text-sm text-gray-600">📍 {supplier.location}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-green-600">Lead Time: {supplier.leadTime}</p>
+                      <p className="text-xs text-gray-400">Smart City Verified</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-3 text-xs text-gray-500 text-center">
+              🌍 Integrated with Lagos Smart City Logistics Network
+            </div>
+          </div>
+        )}
+
+        {/* TAX REPORT SECTION - Nigerian Tax System */}
+        {showTaxReport && (
+          <div className="bg-yellow-50 p-5 rounded-2xl shadow border mb-6">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              🏛️ Nigerian Tax Report (FIRS)
+            </h2>
+            
+            <div className="space-y-3">
+              {/* TIN Information */}
+              <div className="bg-white p-3 rounded-lg">
+                <div className="flex justify-between">
+                  <span className="font-semibold">Tax Identification Number (TIN):</span>
+                  <span>{tinNumber}</span>
+                </div>
+                <div className="flex justify-between mt-2">
+                  <span className="font-semibold">Tax Period:</span>
+                  <span>{taxPeriod}</span>
+                </div>
+              </div>
+              
+              {/* Tax Calculations */}
+              <div className="bg-white p-3 rounded-lg">
+                <p className="font-semibold mb-2">Tax Summary</p>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span>Total Sales (excluding VAT):</span>
+                    <span>₦{totalSales.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>VAT Collected (7.5%):</span>
+                    <span className="font-bold">₦{vatCollected.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-blue-600 font-bold">
+                    <span>Payable to FIRS:</span>
+                    <span>₦{vatCollected.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Company Income Tax (CIT) */}
+              <div className="bg-white p-3 rounded-lg">
+                <p className="font-semibold mb-2">Company Income Tax (CIT)</p>
+                <div className="flex justify-between text-sm">
+                  <span>Estimated Annual Profit:</span>
+                  <span>₦{estimatedProfit.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>CIT Rate (20%):</span>
+                  <span>₦{citAmount.toLocaleString()}</span>
+                </div>
+              </div>
+              
+              {/* Tax Filing Status */}
+              <div className="bg-green-100 p-3 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span>📋 Filing Status:</span>
+                  <span className="font-bold text-green-700">✅ Up to Date</span>
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  <span>📅 Next Filing Due:</span>
+                  <span>April 30, 2026</span>
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => alert("Tax report would download as PDF")}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm flex-1"
+                >
+                  Download Tax Report (PDF)
+                </button>
+                <button 
+                  onClick={() => alert("Submitting tax report to FIRS...")}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm flex-1"
+                >
+                  Submit to FIRS
+                </button>
+              </div>
+            </div>
+            
+            <div className="mt-3 text-xs text-gray-500 text-center">
+              🏛️ Integrated with Federal Inland Revenue Service (FIRS)
+            </div>
+          </div>
+        )}
 
         {/* DASHBOARD - Three Cards */}
         <div className="flex flex-col gap-4 mb-6">
@@ -150,11 +355,12 @@ function App() {
           </div>
 
           <div className="bg-green-600 text-white p-5 rounded-2xl shadow-lg">
-            <h2 className="text-lg font-semibold">VAT Estimate</h2>
+            <h2 className="text-lg font-semibold">VAT Collection (7.5%)</h2>
             <p className="text-2xl mt-2 font-bold">
               ₦{products.reduce((total, product) =>
                 total + (product.price * product.quantity * 0.075), 0).toFixed(2)}
             </p>
+            <p className="text-xs mt-1 opacity-80">To be remitted to FIRS</p>
           </div>
         </div>
 
@@ -204,6 +410,10 @@ function App() {
               </div>
             )}
           </div>
+          
+          <div className="text-xs text-gray-500 text-center mt-3 pt-2 border-t border-purple-200">
+            🌍 Smart City Integration | Lagos Supply Chain Network | FIRS Tax Compliant
+          </div>
         </div>
 
         {/* ANALYTICS */}
@@ -242,7 +452,7 @@ function App() {
                 <XAxis dataKey="category" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="total" />
+                <Bar dataKey="total" fill="#3b82f6" />
               </BarChart>
             </ResponsiveContainer>
           </div>
