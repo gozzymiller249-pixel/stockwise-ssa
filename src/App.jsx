@@ -32,8 +32,10 @@ function App() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [showMenu, setShowMenu] = useState(false);
-  const [showSuppliers, setShowSuppliers] = useState(false);
-  const [showTaxReport, setShowTaxReport] = useState(false);
+  
+  // MODAL STATES
+  const [showSuppliersModal, setShowSuppliersModal] = useState(false);
+  const [showTaxModal, setShowTaxModal] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -43,48 +45,24 @@ function App() {
   });
 
   // SUPPLIERS STATE - Smart City Supply Chain
-  const [suppliers, setSuppliers] = useState(() => {
-    const savedSuppliers = localStorage.getItem("suppliers");
-    if (savedSuppliers) {
-      return JSON.parse(savedSuppliers);
-    }
-    return [
-      { id: 1, name: "Lagos Electronics Hub", product: "Power Bank, Iphone Charger", leadTime: "2 days", location: "Ikeja, Lagos" },
-      { id: 2, name: "Beauty Distributors Ltd", product: "Face Mask", leadTime: "3 days", location: "Victoria Island, Lagos" },
-      { id: 3, name: "Timepieces Nigeria", product: "Wristwatch, Alarm Clock", leadTime: "5 days", location: "Ajah, Lagos" },
-      { id: 4, name: "Lighting Solutions NG", product: "Rechargeable Lamp", leadTime: "2 days", location: "Maryland, Lagos" }
-    ];
-  });
+  const [suppliers] = useState([
+    { id: 1, name: "Lagos Electronics Hub", product: "Power Bank, Iphone Charger", leadTime: "2 days", location: "Ikeja, Lagos" },
+    { id: 2, name: "Beauty Distributors Ltd", product: "Face Mask", leadTime: "3 days", location: "Victoria Island, Lagos" },
+    { id: 3, name: "Timepieces Nigeria", product: "Wristwatch, Alarm Clock", leadTime: "5 days", location: "Ajah, Lagos" },
+    { id: 4, name: "Lighting Solutions NG", product: "Rechargeable Lamp", leadTime: "2 days", location: "Maryland, Lagos" }
+  ]);
 
   // STORE LOCATION - Smart City Integration
-  const [storeLocation, setStoreLocation] = useState(() => {
-    const saved = localStorage.getItem("storeLocation");
-    return saved || "Ikeja, Lagos Mainland";
-  });
+  const [storeLocation] = useState("Ikeja, Lagos Mainland");
 
   // TAX STATE - Nigerian Tax System
-  const [taxPeriod, setTaxPeriod] = useState("March 2026");
-  const [tinNumber, setTinNumber] = useState(() => {
-    const saved = localStorage.getItem("tinNumber");
-    return saved || "01234567-0001";
-  });
+  const [tinNumber] = useState("01234567-0001");
+  const [taxPeriod] = useState("March 2026");
 
   // SAVE TO LOCALSTORAGE
   useEffect(() => {
     localStorage.setItem("products", JSON.stringify(products));
   }, [products]);
-
-  useEffect(() => {
-    localStorage.setItem("suppliers", JSON.stringify(suppliers));
-  }, [suppliers]);
-
-  useEffect(() => {
-    localStorage.setItem("storeLocation", storeLocation);
-  }, [storeLocation]);
-
-  useEffect(() => {
-    localStorage.setItem("tinNumber", tinNumber);
-  }, [tinNumber]);
 
   // FORM HANDLERS
   const handleChange = (e) => {
@@ -135,7 +113,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-300 flex justify-center items-center p-4">
-      <div className="w-full max-w-[390px] bg-white rounded-[40px] shadow-2xl p-5 min-h-[90vh] overflow-y-scroll">
+      <div className="w-full max-w-[390px] bg-white rounded-[40px] shadow-2xl p-5 min-h-[90vh] overflow-y-scroll relative">
 
         {/* HEADER */}
         <div className="flex items-center gap-3 mb-6">
@@ -164,181 +142,64 @@ function App() {
           </div>
         </div>
 
-        {/* COLLAPSIBLE MENU */}
+        {/* COLLAPSIBLE MENU BUTTON */}
         <div className="mb-6">
           <button
-            onClick={() => {
-              setShowMenu(!showMenu);
-              if (showMenu) {
-                setShowSuppliers(false);
-                setShowTaxReport(false);
-              }
-            }}
+            onClick={() => setShowMenu(!showMenu)}
             className="bg-white shadow border rounded-xl px-4 py-3 w-full flex justify-between items-center"
           >
             <span className="font-semibold">Menu</span>
             <span className="text-xl">☰</span>
           </button>
 
+          {/* DROPDOWN MENU */}
           {showMenu && (
             <div className="bg-white shadow rounded-2xl mt-2 p-3 flex flex-col gap-3 border">
               <button 
                 onClick={() => {
-                  setShowSuppliers(false);
-                  setShowTaxReport(false);
+                  setShowMenu(false);
                 }}
                 className="text-left text-blue-600 font-semibold"
               >
-                Home
+                🏠 Home
               </button>
               <button 
                 onClick={() => {
-                  setShowSuppliers(false);
-                  setShowTaxReport(false);
+                  setShowMenu(false);
                 }}
                 className="text-left text-gray-600"
               >
-                Stock
+                📦 Stock
               </button>
               <button 
                 onClick={() => {
-                  setShowSuppliers(true);
-                  setShowTaxReport(false);
+                  setShowSuppliersModal(true);
+                  setShowMenu(false);
                 }}
                 className="text-left text-gray-600"
               >
-                🚚 Suppliers
+                🚚 Suppliers (Smart City)
               </button>
               <button 
                 onClick={() => {
-                  setShowTaxReport(true);
-                  setShowSuppliers(false);
+                  setShowTaxModal(true);
+                  setShowMenu(false);
                 }}
                 className="text-left text-gray-600"
               >
-                🏛️ Tax Report
+                🏛️ Tax Report (FIRS)
+              </button>
+              <button 
+                onClick={() => {
+                  setShowMenu(false);
+                }}
+                className="text-left text-gray-600"
+              >
+                📈 Reports
               </button>
             </div>
           )}
         </div>
-
-        {/* SUPPLIERS SECTION - Smart City Supply Chain */}
-        {showSuppliers && (
-          <div className="bg-green-50 p-5 rounded-2xl shadow border mb-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              🚚 Smart City Supply Chain
-            </h2>
-            
-            <div className="space-y-3">
-              {suppliers.map(supplier => (
-                <div key={supplier.id} className="bg-white p-3 rounded-lg">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-bold">{supplier.name}</p>
-                      <p className="text-sm text-gray-600">Products: {supplier.product}</p>
-                      <p className="text-sm text-gray-600">📍 {supplier.location}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-green-600">Lead Time: {supplier.leadTime}</p>
-                      <p className="text-xs text-gray-400">Smart City Verified</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="mt-3 text-xs text-gray-500 text-center">
-              🌍 Integrated with Lagos Smart City Logistics Network
-            </div>
-          </div>
-        )}
-
-        {/* TAX REPORT SECTION - Nigerian Tax System */}
-        {showTaxReport && (
-          <div className="bg-yellow-50 p-5 rounded-2xl shadow border mb-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              🏛️ Nigerian Tax Report (FIRS)
-            </h2>
-            
-            <div className="space-y-3">
-              {/* TIN Information */}
-              <div className="bg-white p-3 rounded-lg">
-                <div className="flex justify-between">
-                  <span className="font-semibold">Tax Identification Number (TIN):</span>
-                  <span>{tinNumber}</span>
-                </div>
-                <div className="flex justify-between mt-2">
-                  <span className="font-semibold">Tax Period:</span>
-                  <span>{taxPeriod}</span>
-                </div>
-              </div>
-              
-              {/* Tax Calculations */}
-              <div className="bg-white p-3 rounded-lg">
-                <p className="font-semibold mb-2">Tax Summary</p>
-                <div className="space-y-1 text-sm">
-                  <div className="flex justify-between">
-                    <span>Total Sales (excluding VAT):</span>
-                    <span>₦{totalSales.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>VAT Collected (7.5%):</span>
-                    <span className="font-bold">₦{vatCollected.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-blue-600 font-bold">
-                    <span>Payable to FIRS:</span>
-                    <span>₦{vatCollected.toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Company Income Tax (CIT) */}
-              <div className="bg-white p-3 rounded-lg">
-                <p className="font-semibold mb-2">Company Income Tax (CIT)</p>
-                <div className="flex justify-between text-sm">
-                  <span>Estimated Annual Profit:</span>
-                  <span>₦{estimatedProfit.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>CIT Rate (20%):</span>
-                  <span>₦{citAmount.toLocaleString()}</span>
-                </div>
-              </div>
-              
-              {/* Tax Filing Status */}
-              <div className="bg-green-100 p-3 rounded-lg">
-                <div className="flex justify-between items-center">
-                  <span>📋 Filing Status:</span>
-                  <span className="font-bold text-green-700">✅ Up to Date</span>
-                </div>
-                <div className="flex justify-between items-center mt-1">
-                  <span>📅 Next Filing Due:</span>
-                  <span>April 30, 2026</span>
-                </div>
-              </div>
-              
-              {/* Action Buttons */}
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => alert("Tax report would download as PDF")}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm flex-1"
-                >
-                  Download Tax Report (PDF)
-                </button>
-                <button 
-                  onClick={() => alert("Submitting tax report to FIRS...")}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm flex-1"
-                >
-                  Submit to FIRS
-                </button>
-              </div>
-            </div>
-            
-            <div className="mt-3 text-xs text-gray-500 text-center">
-              🏛️ Integrated with Federal Inland Revenue Service (FIRS)
-            </div>
-          </div>
-        )}
 
         {/* DASHBOARD - Three Cards */}
         <div className="flex flex-col gap-4 mb-6">
@@ -357,8 +218,7 @@ function App() {
           <div className="bg-green-600 text-white p-5 rounded-2xl shadow-lg">
             <h2 className="text-lg font-semibold">VAT Collection (7.5%)</h2>
             <p className="text-2xl mt-2 font-bold">
-              ₦{products.reduce((total, product) =>
-                total + (product.price * product.quantity * 0.075), 0).toFixed(2)}
+              ₦{vatCollected.toFixed(2)}
             </p>
             <p className="text-xs mt-1 opacity-80">To be remitted to FIRS</p>
           </div>
@@ -423,8 +283,7 @@ function App() {
             <div className="flex justify-between">
               <span>Total Inventory Value</span>
               <span className="font-bold">
-                ₦{products.reduce((total, product) =>
-                  total + (product.price * product.quantity), 0).toFixed(2)}
+                ₦{totalSales.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between">
@@ -458,7 +317,7 @@ function App() {
           </div>
         </div>
 
-        {/* FORM */}
+        {/* ADD PRODUCT FORM */}
         <div className="bg-white p-5 rounded-2xl shadow border mb-6">
           <h2 className="text-xl font-semibold mb-4">Add Product</h2>
           <div className="flex flex-col gap-4">
@@ -561,6 +420,144 @@ function App() {
             </table>
           </div>
         </div>
+
+        {/* SUPPLIERS MODAL (POPUP) */}
+        {showSuppliersModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl max-w-[350px] w-full max-h-[80vh] overflow-y-auto">
+              <div className="bg-green-600 text-white p-4 rounded-t-2xl flex justify-between items-center">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  🚚 Smart City Supply Chain
+                </h2>
+                <button 
+                  onClick={() => setShowSuppliersModal(false)}
+                  className="text-white text-2xl font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="p-4 space-y-3">
+                {suppliers.map(supplier => (
+                  <div key={supplier.id} className="bg-gray-50 p-3 rounded-lg border">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-bold">{supplier.name}</p>
+                        <p className="text-sm text-gray-600">Products: {supplier.product}</p>
+                        <p className="text-sm text-gray-600">📍 {supplier.location}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-green-600">Lead Time: {supplier.leadTime}</p>
+                        <p className="text-xs text-gray-400">Smart City Verified</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                <div className="mt-3 text-xs text-gray-500 text-center pt-2 border-t">
+                  🌍 Integrated with Lagos Smart City Logistics Network
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAX REPORT MODAL (POPUP) */}
+        {showTaxModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl max-w-[350px] w-full max-h-[80vh] overflow-y-auto">
+              <div className="bg-yellow-600 text-white p-4 rounded-t-2xl flex justify-between items-center">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  🏛️ Nigerian Tax Report (FIRS)
+                </h2>
+                <button 
+                  onClick={() => setShowTaxModal(false)}
+                  className="text-white text-2xl font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="p-4 space-y-3">
+                {/* TIN Information */}
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <div className="flex justify-between">
+                    <span className="font-semibold">Tax ID (TIN):</span>
+                    <span>{tinNumber}</span>
+                  </div>
+                  <div className="flex justify-between mt-2">
+                    <span className="font-semibold">Tax Period:</span>
+                    <span>{taxPeriod}</span>
+                  </div>
+                </div>
+                
+                {/* Tax Calculations */}
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="font-semibold mb-2">Tax Summary</p>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span>Total Sales (excl. VAT):</span>
+                      <span>₦{totalSales.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>VAT Collected (7.5%):</span>
+                      <span className="font-bold">₦{vatCollected.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-green-600 font-bold">
+                      <span>Payable to FIRS:</span>
+                      <span>₦{vatCollected.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Company Income Tax */}
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="font-semibold mb-2">Company Income Tax (CIT)</p>
+                  <div className="flex justify-between text-sm">
+                    <span>Estimated Annual Profit:</span>
+                    <span>₦{estimatedProfit.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>CIT Rate (20%):</span>
+                    <span>₦{citAmount.toLocaleString()}</span>
+                  </div>
+                </div>
+                
+                {/* Filing Status */}
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span>📋 Filing Status:</span>
+                    <span className="font-bold text-green-700">✅ Up to Date</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-1">
+                    <span>📅 Next Filing Due:</span>
+                    <span>April 30, 2026</span>
+                  </div>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => alert("Tax report would download as PDF")}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm flex-1"
+                  >
+                    Download PDF
+                  </button>
+                  <button 
+                    onClick={() => alert("Submitting tax report to FIRS...")}
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm flex-1"
+                  >
+                    Submit to FIRS
+                  </button>
+                </div>
+                
+                <div className="text-xs text-gray-500 text-center pt-2">
+                  🏛️ Integrated with Federal Inland Revenue Service (FIRS)
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>
