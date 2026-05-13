@@ -13,9 +13,25 @@ import {
 function App() {
 
   const [products, setProducts] = useState(() => {
-    const savedProducts = localStorage.getItem("products");
-    return savedProducts ? JSON.parse(savedProducts) : [];
-  });
+  const savedProducts = localStorage.getItem("products");
+  
+  // Default products to show when localStorage is empty
+  const defaultProducts = [
+    { name: "Power Bank", category: "Electronics", quantity: "100", price: "25000" },
+    { name: "Iphone Charger", category: "Electronics", quantity: "100", price: "10000" },
+    { name: "Rechargeable Lamp", category: "Electronics", quantity: "50", price: "10500" },
+    { name: "Alarm Clock", category: "Electronics", quantity: "50", price: "100" },
+    { name: "Wristwatch", category: "Electronics", quantity: "50", price: "20000" },
+    { name: "Face Mask", category: "Beauty", quantity: "100", price: "2000" }
+  ];
+  
+  if (savedProducts) {
+    return JSON.parse(savedProducts);
+  } else {
+    // First time visitor - load default products
+    return defaultProducts;
+  }
+});
 
   const [searchTerm, setSearchTerm] = useState("");
   const [showMenu, setShowMenu] = useState(false);
