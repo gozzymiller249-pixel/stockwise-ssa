@@ -238,100 +238,6 @@ function App() {
             <p className="text-xs mt-1 opacity-80">To be remitted to FIRS</p>
           </div>
         </div>
-
-        {/* SMART INSIGHTS - Purple Section */}
-        <div className="bg-purple-50 p-5 rounded-2xl shadow border mb-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            🤖 Smart Inventory Insights
-          </h2>
-          
-          <div className="space-y-3">
-            {/* Inventory Health Score */}
-            <div className="flex justify-between items-center bg-white p-3 rounded-lg">
-              <span>📊 Inventory Health Score</span>
-              <span className="font-bold text-lg">{predictor.calculateHealthScore(products)}/100</span>
-            </div>
-            
-            {/* Stock Predictions */}
-            <div className="bg-white p-3 rounded-lg">
-              <p className="font-semibold mb-2">🔮 Stockout Predictions</p>
-              {products.length === 0 ? (
-                <p className="text-gray-400 text-sm">Add products to see predictions</p>
-              ) : (
-                products.map(product => {
-                  const daysLeft = predictor.predictStockoutDays(product.name, Number(product.quantity));
-                  return (
-                    <div key={product.name} className="flex justify-between text-sm py-1">
-                      <span>{product.name}</span>
-                      <span className={daysLeft < 7 ? "text-red-500 font-bold" : "text-gray-600"}>
-                        {daysLeft === "No sales data" ? "📈 Learning..." : `${daysLeft} days left`}
-                      </span>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-            
-            {/* Reorder Alerts */}
-            {predictor.getReorderRecommendations(products).length > 0 && (
-              <div className="bg-yellow-50 border-l-4 border-yellow-500 p-3 rounded-lg">
-                <p className="font-semibold text-yellow-700">⚠️ Reorder Alerts</p>
-                {predictor.getReorderRecommendations(products).map(rec => (
-                  <div key={rec.product} className="text-sm mt-1">
-                    <p><strong>{rec.product}</strong>: {rec.message}</p>
-                    <p className="text-xs text-gray-600">Suggested: {rec.suggestedOrder} units</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          <div className="text-xs text-gray-500 text-center mt-3 pt-2 border-t border-purple-200">
-            🌍 Smart City Integration | Lagos Supply Chain Network | FIRS Tax Compliant
-          </div>
-        </div>
-
-        {/* ANALYTICS */}
-        <div id="analytics-section" className="bg-white p-5 rounded-2xl shadow border mb-6">
-          <h2 className="text-xl font-semibold mb-4">Inventory Analytics</h2>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span>Total Inventory Value</span>
-              <span className="font-bold">
-                ₦{totalSales.toFixed(2)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Low Stock Products</span>
-              <span className="font-bold text-red-500">
-                {products.filter(product => product.quantity < 5).length}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Total Units</span>
-              <span className="font-bold">
-                {products.reduce((total, product) =>
-                  total + Number(product.quantity), 0)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* CHART */}
-        <div className="bg-white p-5 rounded-2xl shadow border mb-6">
-          <h2 className="text-xl font-semibold mb-4">Inventory Overview</h2>
-          <div style={{ width: "100%", height: 250 }}>
-            <ResponsiveContainer>
-              <BarChart data={categoryData}>
-                <XAxis dataKey="category" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="total" fill="#3b82f6" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
         {/* ADD PRODUCT FORM */}
         <div className="bg-white p-5 rounded-2xl shadow border mb-6">
           <h2 className="text-xl font-semibold mb-4">Add Product</h2>
@@ -433,6 +339,100 @@ function App() {
                   ))}
               </tbody>
             </table>
+          </div>
+        </div>
+        
+      
+        {/* SMART INSIGHTS - Purple Section */}
+        <div className="bg-purple-50 p-5 rounded-2xl shadow border mb-6">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            🤖 Smart Inventory Insights
+          </h2>
+          
+          <div className="space-y-3">
+            {/* Inventory Health Score */}
+            <div className="flex justify-between items-center bg-white p-3 rounded-lg">
+              <span>📊 Inventory Health Score</span>
+              <span className="font-bold text-lg">{predictor.calculateHealthScore(products)}/100</span>
+            </div>
+            
+            {/* Stock Predictions */}
+            <div className="bg-white p-3 rounded-lg">
+              <p className="font-semibold mb-2">🔮 Stockout Predictions</p>
+              {products.length === 0 ? (
+                <p className="text-gray-400 text-sm">Add products to see predictions</p>
+              ) : (
+                products.map(product => {
+                  const daysLeft = predictor.predictStockoutDays(product.name, Number(product.quantity));
+                  return (
+                    <div key={product.name} className="flex justify-between text-sm py-1">
+                      <span>{product.name}</span>
+                      <span className={daysLeft < 7 ? "text-red-500 font-bold" : "text-gray-600"}>
+                        {daysLeft === "No sales data" ? "📈 Learning..." : `${daysLeft} days left`}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+            
+            {/* Reorder Alerts */}
+            {predictor.getReorderRecommendations(products).length > 0 && (
+              <div className="bg-yellow-50 border-l-4 border-yellow-500 p-3 rounded-lg">
+                <p className="font-semibold text-yellow-700">⚠️ Reorder Alerts</p>
+                {predictor.getReorderRecommendations(products).map(rec => (
+                  <div key={rec.product} className="text-sm mt-1">
+                    <p><strong>{rec.product}</strong>: {rec.message}</p>
+                    <p className="text-xs text-gray-600">Suggested: {rec.suggestedOrder} units</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className="text-xs text-gray-500 text-center mt-3 pt-2 border-t border-purple-200">
+            🌍 Smart City Integration | Lagos Supply Chain Network | FIRS Tax Compliant
+          </div>
+        </div>
+
+        {/* ANALYTICS */}
+        <div id="analytics-section" className="bg-white p-5 rounded-2xl shadow border mb-6">
+          <h2 className="text-xl font-semibold mb-4">Inventory Analytics</h2>
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span>Total Inventory Value</span>
+              <span className="font-bold">
+                ₦{totalSales.toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Low Stock Products</span>
+              <span className="font-bold text-red-500">
+                {products.filter(product => product.quantity < 5).length}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Total Units</span>
+              <span className="font-bold">
+                {products.reduce((total, product) =>
+                  total + Number(product.quantity), 0)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* CHART */}
+        <div className="bg-white p-5 rounded-2xl shadow border mb-6">
+          <h2 className="text-xl font-semibold mb-4">Inventory Overview</h2>
+          <div style={{ width: "100%", height: 250 }}>
+            <ResponsiveContainer>
+              <BarChart data={categoryData}>
+                <XAxis dataKey="category" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="total" fill="#3b82f6" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
