@@ -111,6 +111,21 @@ function App() {
   const estimatedProfit = Math.floor(totalSales * 0.3);
   const citAmount = Math.floor(estimatedProfit * 0.2);
 
+  const scrollToInventory = () => {
+   const element = document.getElementById('inventory-section');
+   if (element) {
+    element.scrollIntoView({ behavior: 'smooth' });
+   }
+   setShowMenu(false);
+  };
+
+  const scrollToAnalytics = () => {
+   const element = document.getElementById('analytics-section');
+   if (element) {
+    element.scrollIntoView({ behavior: 'smooth' });
+   }
+   setShowMenu(false);
+  };
   return (
     <div className="min-h-screen bg-gray-300 flex justify-center items-center p-4">
       <div className="w-full max-w-[390px] bg-white rounded-[40px] shadow-2xl p-5 min-h-[90vh] overflow-y-scroll relative">
@@ -152,7 +167,7 @@ function App() {
             <span className="text-xl">☰</span>
           </button>
 
-          {/* DROPDOWN MENU */}
+                    {/* DROPDOWN MENU */}
           {showMenu && (
             <div className="bg-white shadow rounded-2xl mt-2 p-3 flex flex-col gap-3 border">
               <button 
@@ -165,7 +180,7 @@ function App() {
               </button>
               <button 
                 onClick={() => {
-                  setShowMenu(false);
+                  scrollToInventory();
                 }}
                 className="text-left text-gray-600"
               >
@@ -191,7 +206,7 @@ function App() {
               </button>
               <button 
                 onClick={() => {
-                  setShowMenu(false);
+                  scrollToAnalytics();
                 }}
                 className="text-left text-gray-600"
               >
@@ -277,7 +292,7 @@ function App() {
         </div>
 
         {/* ANALYTICS */}
-        <div className="bg-white p-5 rounded-2xl shadow border mb-6">
+        <div id="analytics-section" className="bg-white p-5 rounded-2xl shadow border mb-6">
           <h2 className="text-xl font-semibold mb-4">Inventory Analytics</h2>
           <div className="space-y-3">
             <div className="flex justify-between">
@@ -363,7 +378,7 @@ function App() {
         </div>
 
         {/* INVENTORY TABLE */}
-        <div className="bg-white p-5 rounded-2xl shadow border">
+        <div id="inventory-section" className="bg-white p-5 rounded-2xl shadow border">
           <h2 className="text-xl font-semibold mb-4">Inventory List</h2>
           
           <div className="mb-4">
