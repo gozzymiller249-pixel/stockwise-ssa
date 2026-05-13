@@ -342,8 +342,7 @@ function App() {
           </div>
         </div>
         
-      
-        {/* SMART INSIGHTS - Purple Section */}
+                {/* SMART INSIGHTS - Purple Section */}
         <div className="bg-purple-50 p-5 rounded-2xl shadow border mb-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             🤖 Smart Inventory Insights
@@ -356,7 +355,7 @@ function App() {
               <span className="font-bold text-lg">{predictor.calculateHealthScore(products)}/100</span>
             </div>
             
-            {/* Stock Predictions */}
+            {/* Stock Predictions - Shows both days predicted AND current stock */}
             <div className="bg-white p-3 rounded-lg">
               <p className="font-semibold mb-2">🔮 Stockout Predictions</p>
               {products.length === 0 ? (
@@ -364,12 +363,18 @@ function App() {
               ) : (
                 products.map(product => {
                   const daysLeft = predictor.predictStockoutDays(product.name, Number(product.quantity));
+                  const currentStock = Number(product.quantity);
                   return (
-                    <div key={product.name} className="flex justify-between text-sm py-1">
+                    <div key={product.name} className="flex justify-between items-center text-sm py-1">
                       <span>{product.name}</span>
-                      <span className={daysLeft < 7 ? "text-red-500 font-bold" : "text-gray-600"}>
-                        {daysLeft === "No sales data" ? "📈 Learning..." : `${daysLeft} days left`}
-                      </span>
+                      <div className="text-right">
+                        <span className={daysLeft < 7 ? "text-red-500 font-bold" : "text-gray-600"}>
+                          {daysLeft === "No sales data" ? "📈 Learning..." : `${daysLeft} days predicted`}
+                        </span>
+                        <span className="text-gray-400 text-xs ml-2">
+                          ({currentStock} units)
+                        </span>
+                      </div>
                     </div>
                   );
                 })
@@ -390,7 +395,12 @@ function App() {
             )}
           </div>
           
-          <div className="text-xs text-gray-500 text-center mt-3 pt-2 border-t border-purple-200">
+          {/* Disclaimer - Predictions are not guarantees */}
+          <div className="text-xs text-gray-400 text-center mt-3 pt-2 border-t border-purple-200">
+            * Predictions based on 7-day sales average. Actual stockout dates may vary due to demand changes.
+          </div>
+          
+          <div className="text-xs text-gray-500 text-center mt-1">
             🌍 Smart City Integration | Lagos Supply Chain Network | FIRS Tax Compliant
           </div>
         </div>
