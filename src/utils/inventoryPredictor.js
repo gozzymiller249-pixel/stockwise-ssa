@@ -1,15 +1,19 @@
+console.log("✅ NEW VERSION OF PREDICTOR LOADED - Version 2");
 // Smart Inventory Prediction System
 
 class SmartInventoryPredictor {
   constructor() {
     // Sales history for predictions (last 7 days of sales data)
     this.salesHistory = {
-  "Power Bank": [15, 14, 16, 13, 15, 14, 15],
-  "Iphone Charger": [12, 11, 13, 10, 12, 11, 12],
-  "Rechargeable Lamp": [8, 7, 9, 8, 7, 8, 9],
-  "Alarm Clock": [5, 6, 5, 4, 5, 6, 5],
-  "Wristwatch": [3, 4, 3, 5, 4, 3, 4],
-  "Face Mask": [20, 18, 22, 19, 21, 20, 19]
+  // Fast sellers (will run out in 3-4 days) - ATRISK
+  "Power Bank": [25, 24, 26, 23, 25, 24, 25],     // 100 stock ÷ 24 avg = 4 days left → ATRISK ✓
+  "Iphone Charger": [30, 28, 32, 29, 31, 30, 29], // 100 stock ÷ 30 avg = 3 days left → ATRISK ✓
+  "Face Mask": [35, 33, 37, 34, 36, 35, 34],      // 100 stock ÷ 35 avg = 3 days left → ATRISK ✓
+  
+  // Slow sellers (will last 10-14 days) - NOT ATRISK
+  "Rechargeable Lamp": [4, 5, 3, 6, 4, 5, 4],     // 50 stock ÷ 4.5 avg = 11 days left → SAFE
+  "Alarm Clock": [4, 3, 5, 4, 3, 5, 4],          // 50 stock ÷ 4 avg = 12 days left → SAFE
+  "Wristwatch": [3, 4, 3, 5, 4, 3, 4]            // 50 stock ÷ 3.7 avg = 13 days left → SAFE
 };
   }
 
@@ -91,21 +95,23 @@ class SmartInventoryPredictor {
   
   // Calculate overall inventory health score (0-100)
   calculateHealthScore(products) {
-    if (products.length === 0) return 0;
-    
-    let totalScore = 0;
-    for (const product of products) {
-      const daysRemaining = this.predictStockoutDays(product.name, Number(product.quantity));
-      if (daysRemaining !== "No sales data" && typeof daysRemaining === 'number') {
-        const score = Math.min(100, (daysRemaining / 30) * 100);
-        totalScore += score;
-      } else {
-        totalScore += 50;
-      }
+  if (products.length === 0) return 0;
+  
+  let atRiskCount = 0;
+  
+  for (const product of products) {
+    const daysRemaining = this.predictStockoutDays(product.name, Number(product.quantity));
+    // Count products with less than 7 days of stock
+    if (daysRemaining !== "No sales data" && daysRemaining < 7) {
+      atRiskCount++;
     }
-    
-    return Math.floor(totalScore / products.length);
   }
+  
+  // Calculate percentage of products that are SAFE (not at risk)
+  const safePercentage = ((products.length - atRiskCount) / products.length) * 100;
+  
+  return Math.floor(safePercentage);
+}
 }
 
 export default new SmartInventoryPredictor();
