@@ -11,6 +11,7 @@ import {
 
 function App() {
 
+  // PRODUCT STATE
   const [products, setProducts] = useState(() => {
     const savedProducts = localStorage.getItem("products");
     const defaultProducts = [
@@ -42,10 +43,40 @@ function App() {
     costPrice: ""
   });
 
+  // SUPPLIER STATE - WITH LOCALSTORAGE PERSISTENCE
+  const [suppliers, setSuppliers] = useState(() => {
+    const savedSuppliers = localStorage.getItem("suppliers");
+    if (savedSuppliers) {
+      return JSON.parse(savedSuppliers);
+    }
+    return [
+      { id: 1, name: "Lagos Electronics Hub", product: "Power Bank, Iphone Charger", leadTime: "2 days", location: "Ikeja, Lagos" },
+      { id: 2, name: "Beauty Distributors Ltd", product: "Face Mask", leadTime: "3 days", location: "Victoria Island, Lagos" },
+      { id: 3, name: "Timepieces Nigeria", product: "Wristwatch, Alarm Clock", leadTime: "5 days", location: "Ajah, Lagos" },
+      { id: 4, name: "Lighting Solutions NG", product: "Rechargeable Lamp", leadTime: "2 days", location: "Maryland, Lagos" }
+    ];
+  });
+
+  // SUPPLIER MODAL STATE
+  const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
+  const [editingSupplier, setEditingSupplier] = useState(null);
+  const [supplierForm, setSupplierForm] = useState({
+    name: "",
+    product: "",
+    leadTime: "",
+    location: ""
+  });
+
+  // SAVE TO LOCALSTORAGE
   useEffect(() => {
     localStorage.setItem("products", JSON.stringify(products));
   }, [products]);
 
+  useEffect(() => {
+    localStorage.setItem("suppliers", JSON.stringify(suppliers));
+  }, [suppliers]);
+
+  // PRODUCT HANDLERS
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -74,20 +105,7 @@ function App() {
     });
   };
 
-  const categoryData = Object.values(
-    products.reduce((acc, product) => {
-      if (!acc[product.category]) {
-        acc[product.category] = {
-          category: product.category,
-          total: 0
-        };
-      }
-      acc[product.category].total += Number(product.quantity);
-      return acc;
-    }, {})
-  );
-
-    const startEdit = (product, index) => {
+  const startEdit = (product, index) => {
     setEditingProduct({ ...product, editIndex: index });
     setFormData({
       name: product.name,
@@ -96,7 +114,6 @@ function App() {
       price: product.price,
       costPrice: product.costPrice || ""
     });
-    
     setTimeout(() => {
       const formElement = document.getElementById('add-product-form');
       if (formElement) {
@@ -104,21 +121,13 @@ function App() {
       }
     }, 100);
   };
+
   const saveEdit = () => {
-      if (!formData.name || !formData.category || !formData.quantity || !formData.price) {
+    if (!formData.name || !formData.category || !formData.quantity || !formData.price) {
       alert("Please fill all fields");
       return;
-      }
-      const cancelEdit = () => {
-    setEditingProduct(null);
-    setFormData({
-      name: "",
-      category: "",
-      quantity: "",
-      price: "",
-      costPrice: ""
-    });
-  };
+    }
+    
     const updatedProducts = [...products];
     updatedProducts[editingProduct.editIndex] = {
       name: formData.name,
@@ -137,10 +146,7 @@ function App() {
       costPrice: ""
     });
   };
-  const deleteProduct = (indexToDelete) => {
-    const updatedProducts = products.filter((_, index) => index !== indexToDelete);
-    setProducts(updatedProducts);
-  };
+
   const cancelEdit = () => {
     setEditingProduct(null);
     setFormData({
@@ -152,6 +158,100 @@ function App() {
     });
   };
 
+  const deleteProduct = (indexToDelete) => {
+    const updatedProducts = products.filter((_, index) => index !== indexToDelete);
+    setProducts(updatedProducts);
+  };
+
+  // SUPPLIER HANDLERS
+  const handleSupplierChange = (e) => {
+    setSupplierForm({
+      ...supplierForm,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const addSupplier = () => {
+    if (!supplierForm.name || !supplierForm.product || !supplierForm.leadTime || !supplierForm.location) {
+      alert("Please fill all supplier fields");
+      return;
+    }
+    
+    const newSupplier = {
+      id: Date.now(),
+      name: supplierForm.name,
+      product: supplierForm.product,
+      leadTime: supplierForm.leadTime,
+      location: supplierForm.location
+    };
+    
+    setSuppliers([...suppliers, newSupplier]);
+    setSupplierForm({ name: "", product: "", leadTime: "", location: "" });
+    setShowAddSupplierModal(false);
+  };
+
+  const startEditSupplier = (supplier) => {
+    setEditingSupplier(supplier);
+    setSupplierForm({
+      name: supplier.name,
+      product: supplier.product,
+      leadTime: supplier.leadTime,
+      location: supplier.location
+    });
+    setShowAddSupplierModal(true);
+  };
+
+  const saveEditSupplier = () => {
+    if (!supplierForm.name || !supplierForm.product || !supplierForm.leadTime || !supplierForm.location) {
+      alert("Please fill all supplier fields");
+      return;
+    }
+    
+    const updatedSuppliers = suppliers.map(supplier =>
+      supplier.id === editingSupplier.id
+        ? { ...supplier,
+            name: supplierForm.name,
+            product: supplierForm.product,
+            leadTime: supplierForm.leadTime,
+            location: supplierForm.location
+          }
+        : supplier
+    );
+    
+    setSuppliers(updatedSuppliers);
+    setEditingSupplier(null);
+    setSupplierForm({ name: "", product: "", leadTime: "", location: "" });
+    setShowAddSupplierModal(false);
+  };
+
+  const deleteSupplier = (id) => {
+    if (window.confirm("Are you sure you want to delete this supplier?")) {
+      const updatedSuppliers = suppliers.filter(supplier => supplier.id !== id);
+      setSuppliers(updatedSuppliers);
+    }
+  };
+
+  const cancelSupplierEdit = () => {
+    setEditingSupplier(null);
+    setSupplierForm({ name: "", product: "", leadTime: "", location: "" });
+    setShowAddSupplierModal(false);
+  };
+
+  // CHART DATA
+  const categoryData = Object.values(
+    products.reduce((acc, product) => {
+      if (!acc[product.category]) {
+        acc[product.category] = {
+          category: product.category,
+          total: 0
+        };
+      }
+      acc[product.category].total += Number(product.quantity);
+      return acc;
+    }, {})
+  );
+
+  // TAX CALCULATIONS
   const totalSales = products.reduce((total, p) => total + (Number(p.price) * Number(p.quantity)), 0);
   const totalCost = products.reduce((total, p) => total + ((Number(p.costPrice) || Number(p.price) * 0.6) * Number(p.quantity)), 0);
   const outputVat = products.reduce((total, p) => total + (Number(p.price) * Number(p.quantity) * 0.075), 0);
@@ -160,6 +260,7 @@ function App() {
   const estimatedProfit = Math.floor(totalSales * 0.3);
   const citAmount = Math.floor(estimatedProfit * 0.2);
 
+  // SCROLL FUNCTIONS
   const scrollToInventory = () => {
     const element = document.getElementById('inventory-section');
     if (element) {
@@ -175,13 +276,6 @@ function App() {
     }
     setShowMenu(false);
   };
-
-  const suppliers = [
-    { id: 1, name: "Lagos Electronics Hub", product: "Power Bank, Iphone Charger", leadTime: "2 days", location: "Ikeja, Lagos" },
-    { id: 2, name: "Beauty Distributors Ltd", product: "Face Mask", leadTime: "3 days", location: "Victoria Island, Lagos" },
-    { id: 3, name: "Timepieces Nigeria", product: "Wristwatch, Alarm Clock", leadTime: "5 days", location: "Ajah, Lagos" },
-    { id: 4, name: "Lighting Solutions NG", product: "Rechargeable Lamp", leadTime: "2 days", location: "Maryland, Lagos" }
-  ];
 
   const storeLocation = "Ikeja, Lagos Mainland";
   const tinNumber = "01234567-0001";
@@ -210,7 +304,7 @@ function App() {
           <div className="text-xs text-gray-500">🚚 Smart City Supply Chain Active</div>
         </div>
 
-                {/* MENU BUTTON */}
+        {/* MENU BUTTON */}
         <div className="mb-6">
           <button
             onClick={() => setShowMenu(!showMenu)}
@@ -273,7 +367,7 @@ function App() {
           </div>
         </div>
 
-                {/* ADD/EDIT PRODUCT FORM */}
+        {/* ADD/EDIT PRODUCT FORM */}
         <div id="add-product-form" className="bg-white p-5 rounded-2xl shadow border mb-6">
           <h2 className="text-xl font-semibold mb-4">
             {editingProduct ? "✏️ Edit Product" : "➕ Add Product"}
@@ -321,26 +415,11 @@ function App() {
             />
             {editingProduct ? (
               <div className="flex gap-2">
-                <button
-                  onClick={saveEdit}
-                  className="bg-green-600 text-white p-3 rounded-lg font-semibold flex-1"
-                >
-                  ✅ Save Changes
-                </button>
-                <button
-                  onClick={cancelEdit}
-                  className="bg-gray-400 text-white p-3 rounded-lg font-semibold flex-1"
-                >
-                  Cancel
-                </button>
+                <button onClick={saveEdit} className="bg-green-600 text-white p-3 rounded-lg font-semibold flex-1">✅ Save Changes</button>
+                <button onClick={cancelEdit} className="bg-gray-400 text-white p-3 rounded-lg font-semibold flex-1">Cancel</button>
               </div>
             ) : (
-              <button
-                onClick={addProduct}
-                className="bg-blue-600 text-white p-3 rounded-lg font-semibold"
-              >
-                Add Product
-              </button>
+              <button onClick={addProduct} className="bg-blue-600 text-white p-3 rounded-lg font-semibold">Add Product</button>
             )}
           </div>
         </div>
@@ -379,7 +458,7 @@ function App() {
           </div>
         </div>
 
-                {/* SMART INSIGHTS */}
+        {/* SMART INSIGHTS */}
         <div className="bg-purple-50 p-5 rounded-2xl shadow border mb-6">
           <h2 className="text-xl font-semibold mb-4">🤖 Smart Inventory Insights</h2>
           <div className="space-y-3">
@@ -403,7 +482,7 @@ function App() {
               })}
             </div>
             
-            {/* REORDER ALERTS - Add this entire block */}
+            {/* REORDER ALERTS */}
             {products.filter(product => {
               const daysLeft = predictor.predictStockoutDays(product.name, Number(product.quantity));
               return daysLeft !== "No sales data" && daysLeft < 7;
@@ -424,7 +503,6 @@ function App() {
                 })}
               </div>
             )}
-            
           </div>
           <div className="text-xs text-gray-400 text-center mt-3">* Predictions based on 7-day sales average. Actual dates may vary.</div>
         </div>
@@ -453,20 +531,126 @@ function App() {
         {/* SUPPLIERS MODAL */}
         {showSuppliersModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl max-w-[350px] w-full">
-              <div className="bg-green-600 text-white p-4 rounded-t-2xl flex justify-between">
-                <h2 className="font-semibold">🚚 Smart City Supply Chain</h2>
+            <div className="bg-white rounded-2xl max-w-[350px] w-full max-h-[80vh] overflow-y-auto">
+              <div className="bg-green-600 text-white p-4 rounded-t-2xl flex justify-between items-center">
+                <h2 className="font-semibold flex items-center gap-2">🚚 Smart City Supply Chain</h2>
                 <button onClick={() => setShowSuppliersModal(false)} className="text-white text-xl font-bold">✕</button>
               </div>
+              
               <div className="p-4">
-                {suppliers.map(s => (
-                  <div key={s.id} className="bg-gray-50 p-3 rounded-lg mb-2">
-                    <p className="font-bold">{s.name}</p>
-                    <p className="text-sm">Products: {s.product}</p>
-                    <p className="text-sm">📍 {s.location}</p>
-                    <p className="text-sm text-green-600">Lead Time: {s.leadTime}</p>
-                  </div>
-                ))}
+                {/* Add Supplier Button */}
+                <button
+                  onClick={() => {
+                    setEditingSupplier(null);
+                    setSupplierForm({ name: "", product: "", leadTime: "", location: "" });
+                    setShowAddSupplierModal(true);
+                  }}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm w-full mb-3 flex items-center justify-center gap-2"
+                >
+                  ➕ Add New Supplier
+                </button>
+                
+                {/* Suppliers List */}
+                <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                  {suppliers.length === 0 ? (
+                    <div className="text-center text-gray-400 py-4">No suppliers yet. Click "Add New Supplier" to get started.</div>
+                  ) : (
+                    suppliers.map(supplier => (
+                      <div key={supplier.id} className="bg-gray-50 p-3 rounded-lg border relative">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <p className="font-bold">{supplier.name}</p>
+                            <p className="text-sm text-gray-600">📦 Products: {supplier.product}</p>
+                            <p className="text-sm text-gray-600">📍 {supplier.location}</p>
+                            <p className="text-sm font-semibold text-green-600">⏱️ Lead Time: {supplier.leadTime}</p>
+                          </div>
+                          <div className="flex gap-1 ml-2">
+                            <button
+                              onClick={() => startEditSupplier(supplier)}
+                              className="bg-blue-500 text-white px-2 py-1 rounded-lg text-xs"
+                            >
+                              ✏️ Edit
+                            </button>
+                            <button
+                              onClick={() => deleteSupplier(supplier.id)}
+                              className="bg-red-500 text-white px-2 py-1 rounded-lg text-xs"
+                            >
+                              🗑️ Del
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                
+                <div className="mt-3 text-xs text-gray-500 text-center pt-2 border-t">
+                  🌍 Integrated with Lagos Smart City Logistics Network
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ADD/EDIT SUPPLIER MODAL */}
+        {showAddSupplierModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl max-w-[350px] w-full">
+              <div className="bg-blue-600 text-white p-4 rounded-t-2xl flex justify-between items-center">
+                <h2 className="font-semibold">
+                  {editingSupplier ? "✏️ Edit Supplier" : "➕ Add New Supplier"}
+                </h2>
+                <button onClick={cancelSupplierEdit} className="text-white text-xl font-bold">✕</button>
+              </div>
+              
+              <div className="p-4 space-y-3">
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Supplier Name"
+                  value={supplierForm.name}
+                  onChange={handleSupplierChange}
+                  className="border p-3 rounded-lg w-full"
+                />
+                <input
+                  type="text"
+                  name="product"
+                  placeholder="Products Supplied"
+                  value={supplierForm.product}
+                  onChange={handleSupplierChange}
+                  className="border p-3 rounded-lg w-full"
+                />
+                <input
+                  type="text"
+                  name="leadTime"
+                  placeholder="Lead Time (e.g., 2 days)"
+                  value={supplierForm.leadTime}
+                  onChange={handleSupplierChange}
+                  className="border p-3 rounded-lg w-full"
+                />
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Location (e.g., Ikeja, Lagos)"
+                  value={supplierForm.location}
+                  onChange={handleSupplierChange}
+                  className="border p-3 rounded-lg w-full"
+                />
+                
+                <div className="flex gap-2">
+                  <button
+                    onClick={editingSupplier ? saveEditSupplier : addSupplier}
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm flex-1"
+                  >
+                    {editingSupplier ? "✅ Save Changes" : "➕ Add Supplier"}
+                  </button>
+                  <button
+                    onClick={cancelSupplierEdit}
+                    className="bg-gray-400 text-white px-4 py-2 rounded-lg text-sm flex-1"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -515,7 +699,7 @@ function App() {
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement('a');
                       a.href = url;
-                      a.download = `tax_report_${taxPeriod.replace(/ /g, '_')}.txt`;
+                      a.download = 'tax_report.txt';
                       a.click();
                       URL.revokeObjectURL(url);
                     }}
