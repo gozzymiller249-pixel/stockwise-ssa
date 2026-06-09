@@ -1,9 +1,11 @@
+// src/Login.jsx
 import { useState } from 'react';
 import { login } from './services/api';
 
 function Login({ onLoginSuccess }) {
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState('shop');  // Default role
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -15,9 +17,15 @@ function Login({ onLoginSuccess }) {
         try {
             const result = await login(phone, password);
             if (result.success) {
-                localStorage.setItem('user', JSON.stringify(result.user));
+                // Store role with user data
+                const userData = {
+                    ...result.user,
+                    role: role
+                };
+                localStorage.setItem('user', JSON.stringify(userData));
                 localStorage.setItem('auth_token', result.token || 'logged_in');
-                onLoginSuccess(result.user);
+                localStorage.setItem('user_role', role);
+                onLoginSuccess(userData);
             } else {
                 setError(result.message);
             }
@@ -29,28 +37,48 @@ function Login({ onLoginSuccess }) {
     };
 
     return (
-        <div style={{ maxWidth: '400px', margin: '50px auto', padding: '30px', border: '1px solid #ddd', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>StockWise SSA Login</h2>
+        <div style={{ maxWidth: '400px', margin: '50px auto', padding: '30px', border: '1px solid #ddd', borderRadius: '10px' }}>
+            <h2 style={{ textAlign: 'center' }}>Smart Supply Chain Platform</h2>
+            
+            {/* Role Selection */}
+            <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+                <p style={{ marginBottom: '10px' }}>Login as:</p>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                    <label style={{ padding: '8px 16px', backgroundColor: role === 'shop' ? '#3b82f6' : '#e5e7eb', borderRadius: '8px', cursor: 'pointer' }}>
+                        <input type="radio" name="role" value="shop" checked={role === 'shop'} onChange={(e) => setRole(e.target.value)} style={{ display: 'none' }} />
+                        🏪 Shop Owner
+                    </label>
+                    <label style={{ padding: '8px 16px', backgroundColor: role === 'driver' ? '#3b82f6' : '#e5e7eb', borderRadius: '8px', cursor: 'pointer' }}>
+                        <input type="radio" name="role" value="driver" checked={role === 'driver'} onChange={(e) => setRole(e.target.value)} style={{ display: 'none' }} />
+                        🚚 Driver
+                    </label>
+                    <label style={{ padding: '8px 16px', backgroundColor: role === 'customer' ? '#3b82f6' : '#e5e7eb', borderRadius: '8px', cursor: 'pointer' }}>
+                        <input type="radio" name="role" value="customer" checked={role === 'customer'} onChange={(e) => setRole(e.target.value)} style={{ display: 'none' }} />
+                        🛒 Customer
+                    </label>
+                </div>
+            </div>
+
             <form onSubmit={handleSubmit}>
                 <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px' }}>Phone Number:</label>
+                    <label>Phone Number:</label>
                     <input
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="08012345678"
-                        style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '5px' }}
+                        style={{ width: '100%', padding: '10px', marginTop: '5px', border: '1px solid #ddd', borderRadius: '5px' }}
                         required
                     />
                 </div>
                 <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px' }}>Password:</label>
+                    <label>Password:</label>
                     <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter your password"
-                        style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '5px' }}
+                        style={{ width: '100%', padding: '10px', marginTop: '5px', border: '1px solid #ddd', borderRadius: '5px' }}
                         required
                     />
                 </div>
@@ -58,7 +86,7 @@ function Login({ onLoginSuccess }) {
                 <button 
                     type="submit" 
                     disabled={loading} 
-                    style={{ width: '100%', padding: '12px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px' }}
+                    style={{ width: '100%', padding: '12px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
                 >
                     {loading ? 'Logging in...' : 'Login'}
                 </button>
