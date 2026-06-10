@@ -14,10 +14,27 @@ function Login({ onLoginSuccess }) {
         setLoading(true);
         setError('');
 
+        // TEMPORARY: Skip backend login for testing
+        // This allows you to login with ANY phone and password
+        setTimeout(() => {
+            const mockUser = {
+                id: 1,
+                phone: phone || "08099999999",
+                business_name: role === 'driver' ? 'Test Driver' : role === 'customer' ? 'Test Customer' : 'Test Shop',
+                role: role
+            };
+            localStorage.setItem('user', JSON.stringify(mockUser));
+            localStorage.setItem('user_role', role);
+            onLoginSuccess(mockUser);
+            setLoading(false);
+        }, 500);
+        
+        return; // Skip the real API call
+        
+        /* ORIGINAL CODE COMMENTED OUT
         try {
             const result = await login(phone, password);
             if (result.success) {
-                // Store role with user data
                 const userData = {
                     ...result.user,
                     role: role
@@ -34,7 +51,8 @@ function Login({ onLoginSuccess }) {
         } finally {
             setLoading(false);
         }
-    };
+        */
+    };  // ← This closing brace was missing
 
     return (
         <div style={{ maxWidth: '400px', margin: '50px auto', padding: '30px', border: '1px solid #ddd', borderRadius: '10px' }}>

@@ -31,11 +31,9 @@ export const login = async (phone, password) => {
 
 // Get all products
 export const getProducts = async () => {
-    const response = await fetch(`${API_URL}/test_product.php`, {
+    const response = await fetch(`${API_URL}/test_mock_products.php`, {
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        }
+        headers: { 'Content-Type': 'application/json' }
     });
     const data = await handleResponse(response);
     return data.products || [];
