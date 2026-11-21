@@ -1,6 +1,6 @@
 // API service for connecting React app to LAMP backend
 
-const API_URL = 'http://172.20.10.2/mima/api';
+export const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {

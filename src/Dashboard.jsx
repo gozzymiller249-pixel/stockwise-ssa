@@ -111,7 +111,7 @@ function Dashboard({ user, onLogout }) {
             return;
         }
         try {
-            const response = await fetch(`http://172.20.10.2/mima/api/test_product.php?id=${editingProduct.id}`, {
+            const response = await fetch(`${API_URL}/test_product.php?id=${editingProduct.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
